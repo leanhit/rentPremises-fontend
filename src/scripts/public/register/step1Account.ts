@@ -24,10 +24,10 @@ export default {
                 ElMessage.warning(t('Username không được chứa dấu cách'));
                 return false;
             }
-            
+
             try {
                 const res = await usersApi.checkUsername(username.value); // 👈 dùng checkUsername thay vì checkEmail
-                if (res.exists) {
+                if (res.status === 200 && res.data === true) {
                     ElMessage.error(t('Username đã tồn tại'));
                     return false;
                 }

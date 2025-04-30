@@ -11,6 +11,7 @@ import VueLazyLoad from 'vue3-lazyload';
 import TextClamp from 'vue3-text-clamp'; 
 import SkeletonBoxWithoutLoading from '@/components/SkeletonBoxWithoutLoading.vue';
 import moment from 'moment';
+import './assets/styles.css';
 import i18n from "./i18n";
 
 const axiosInstance = axios.create({

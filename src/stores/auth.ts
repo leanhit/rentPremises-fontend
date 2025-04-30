@@ -1,18 +1,27 @@
 import { defineStore } from 'pinia';
-// store/auth.js (Pinia)
+
 export const useAuthStore = defineStore('auth', {
     state: () => ({
-        token: null,
-        user: null, // chứa role
+        token: localStorage.getItem('accessToken'),
+        user: null,
+        systemRole: localStorage.getItem('systemRole'),
     }),
     actions: {
-        login(token: any, user: any) {
+        login(token: string, user: any) {
             this.token = token;
             this.user = user;
+            this.systemRole = user.systemRole; // Assuming user object has systemRole or role property
+
+            localStorage.setItem('accessToken', token);
+            localStorage.setItem('systemRole', user.systemRole); // Save systemRole or role to localStorage
         },
         logout() {
             this.token = null;
             this.user = null;
+            this.systemRole = null;
+
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('systemRole');
         },
     },
 });

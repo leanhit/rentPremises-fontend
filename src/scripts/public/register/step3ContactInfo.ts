@@ -1,3 +1,4 @@
+import { watch, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { ElMessage } from 'element-plus';
 import { usersApi } from '@/api/usersApi';
@@ -6,6 +7,7 @@ export default {
     props: ['form'],
     setup(props: any, context: any) {
         const { t } = useI18n();
+        const businessRoles = ref('RENT');
 
         const validateEmailFormat = (email: string) => {
             const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -13,11 +15,13 @@ export default {
         };
 
         const checkBeforeNext = async () => {
-            const { email, phone, address, role } = props.form;
+            const { email, phone, address } = props.form;
 
-            if (!email || !phone || !address || !role) {
+            if (!email || !phone || !address) {
                 ElMessage.warning(
-                    t('Vui lòng nhập đầy đủ email, số điện thoại, địa chỉ và vai trò')
+                    t(
+                        'Vui lòng nhập đầy đủ email, số điện thoại, địa chỉ và vai trò'
+                    )
                 );
                 return false;
             }
@@ -33,13 +37,13 @@ export default {
             }
 
             try {
-                const res = await usersApi.checkUsername(username.value); // 👈 dùng checkUsername thay vì checkEmail
-                if (res.exists) {
-                    ElMessage.error(t('Username đã tồn tại'));
+                const res = await usersApi.checkEmail(email); // 👈 dùng checkUsername thay vì checkEmail
+                if (res.status !== 200 && res.data === true) {
+                    ElMessage.error(t('Email đã tồn tại'));
                     return false;
                 }
             } catch (err) {
-                ElMessage.error(t('Có lỗi khi kiểm tra Username'));
+                ElMessage.error(t('Có lỗi khi kiểm tra email'));
                 return false;
             }
 
@@ -56,12 +60,17 @@ export default {
             return true;
         };
 
+        watch(businessRoles, (newValue) => {
+            props.form.businessRoles = [newValue]; // 👈 cập nhật form reactive
+        });
+
         context.expose({
             checkBeforeNext,
         });
 
         return {
             t,
+            businessRoles,
             props,
         };
     },

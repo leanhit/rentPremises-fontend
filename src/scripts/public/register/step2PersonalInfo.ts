@@ -9,7 +9,7 @@ export default {
 
         const { fullName, gender } = toRefs(props.form);
 
-        // Không lấy dob từ toRefs, vì mình sẽ gán trực tiếp vào props.form.dob
+        // Không lấy dateOfBirth từ toRefs, vì mình sẽ gán trực tiếp vào props.form.dateOfBirth
         const selectedDay = ref('');
         const selectedMonth = ref('');
         const selectedYear = ref('');
@@ -48,30 +48,30 @@ export default {
             const monthStr = String(month).padStart(2, '0');
             const dayStr = String(day).padStart(2, '0');
 
-            props.form.dob = `${year}-${monthStr}-${dayStr}`;
+            props.form.dateOfBirth = `${year}-${monthStr}-${dayStr}`;
         });
 
-        if (!props.form.dob) {
+        if (!props.form.dateOfBirth) {
             const today = getToday();
             selectedYear.value = today.year.toString();
             selectedMonth.value = today.month.toString();
             selectedDay.value = today.day.toString();
-            props.form.dob = `${today.year}-${String(today.month).padStart(2, '0')}-${String(today.day).padStart(2, '0')}`;
+            props.form.dateOfBirth = `${today.year}-${String(today.month).padStart(2, '0')}-${String(today.day).padStart(2, '0')}`;
         } else {
-            const date = new Date(props.form.dob);
+            const date = new Date(props.form.dateOfBirth);
             selectedYear.value = date.getFullYear().toString();
             selectedMonth.value = (date.getMonth() + 1).toString();
             selectedDay.value = date.getDate().toString();
         }
 
         const checkBeforeNext = () => {
-            if (!fullName.value || !props.form.dob || !gender.value) {
+            if (!fullName.value || !props.form.dateOfBirth || !gender.value) {
                 ElMessage.warning(t('Vui lòng nhập đầy đủ họ tên, ngày sinh và giới tính'));
                 return false;
             }
 
             const today = new Date();
-            const selectedDate = new Date(props.form.dob);
+            const selectedDate = new Date(props.form.dateOfBirth);
 
             if (selectedDate > today) {
                 ElMessage.warning(t('Ngày sinh không hợp lệ (không thể ở tương lai)'));
