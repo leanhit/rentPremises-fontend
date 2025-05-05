@@ -4,14 +4,14 @@
         <TopNav />
 
         <!-- Search Bar -->
-        <div class="p-4">
+        <!-- <div class="p-4">
             <SearchBar />
-        </div>
+        </div> -->
 
         <!-- Filter Bar -->
-        <div class="px-4">
+        <!-- <div class="px-4">
             <FilterBar />
-        </div>
+        </div> -->
 
         <!-- Stay List -->
         <div class="p-4">
@@ -29,7 +29,7 @@
 <script lang="ts">
 import { reactive } from 'vue';
 // Import các component
-import TopNav from './layout/TopNav.vue';
+import TopNav from './layout/topnav/Index.vue';
 import SearchBar from './layout/SearchBar.vue';
 import FilterBar from './layout/FilterBar.vue';
 import StayCard from './layout/StayCard.vue';

@@ -80,7 +80,7 @@ export default {
 
                     // 👇 redirect bằng router.push()
                     if (form.systemRole === 'ADMIN') {
-                        router.push('/admin-dashboard');
+                        router.push('/admin/dashboard');
                     } else if (form.systemRole === 'USER') {
                         router.push('/');
                     } else {

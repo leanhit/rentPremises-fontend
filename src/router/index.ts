@@ -1,9 +1,12 @@
 import { createRouter, createWebHistory } from 'vue-router';
+import { useAuthStore } from '@/stores/auth'; // đường dẫn tùy vào bạn
+
+import Help from '@/views/public/Help.vue';
 import Home from '@/views/Home.vue';
 import Login from '@/views/public/Login.vue';
 import Register from '@/views/public/register/RegistrationForm.vue';
 import AdminDashboard from '@/views/private/admin/dashboard/index.vue';
-import UserDashboard from '@/views/private/user/index.vue';
+import Lease from '@/views/private/user/lease/Index.vue';
 
 const routes = [
     {
@@ -23,21 +26,26 @@ const routes = [
         meta: { requiresGuest: true },
     },
     {
-        path: '/user-dashboard',
-        name: 'user-dashboard',
-        component: UserDashboard,
-        meta: { requiresAuth: true, role: 'USER' },
+        path: '/help',
+        name: 'help',
+        component: Help,
     },
     {
-        path: '/app',
+        path: '/lease',
+        name: 'lease',
+        component: Lease,
+        //meta: { requiresGuest: true },
+    },
+    {
+        path: '/admin',
         component: AdminDashboard,
         name: 'LayoutZoter',
         meta: { requiresAuth: true },
-        redirect: '/app/redirect-by-role',
+        redirect: '/admin/redirect-by-role',
         children: [
             {
-                path: 'admin-dashboard',
-                name: 'admin-dashboard',
+                path: '/dashboard',
+                name: '/dashboard',
                 component: AdminDashboard,
                 meta: { requiresAuth: true, role: 'ADMIN' },
             },
@@ -47,9 +55,9 @@ const routes = [
                 beforeEnter: (to, from, next) => {
                     const role = localStorage.getItem('systemRole');
                     if (role === 'ADMIN') {
-                        next({ name: 'admin-dashboard' });
+                        next({ name: 'dashboard' });
                     } else if (role === 'USER') {
-                        next({ name: 'user-dashboard' });
+                        next({ name: '/' });
                     } else {
                         next('/login');
                     }
@@ -65,22 +73,25 @@ const router = createRouter({
 });
 
 router.beforeEach((to, from, next) => {
-    const isAuthenticated = !!localStorage.getItem('accessToken');
-    const systemRole = localStorage.getItem('systemRole');
+    const authStore = useAuthStore();
+
+    const isAuthenticated = authStore.isLoggedIn; // reactive
+    const systemRole = authStore.user?.systemRole; // ví dụ: 'ADMIN' | 'USER'
 
     if (to.meta.requiresAuth && !isAuthenticated) {
         next('/login');
     } else if (to.meta.requiresGuest && isAuthenticated) {
-        if (systemRole === 'ADMIN') {
-            next('/app/admin-dashboard');
-        } else if (systemRole === 'USER') {
-            next('/user-dashboard');
+        if (systemRole === 'ADMIN' && to.path !== '/admin/dashboard') {
+            next('/admin/dashboard');
+        } else if (systemRole === 'USER' && to.path !== '/') {
+            next('/');
         } else {
-            next('/login');
+            next();
         }
     } else {
         next();
     }
 });
+
 
 export default router;

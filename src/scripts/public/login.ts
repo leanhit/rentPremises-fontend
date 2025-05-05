@@ -37,7 +37,7 @@ export default {
                             authStore.login(token, user); // ✅ Gọi store login
 
                             if (response.data.systemRole === 'ADMIN') {
-                                router.push('/admin-dashboard');
+                                router.push('/admin/dashboard');
                             } else if (response.data.systemRole === 'USER') {
                                 router.push('/');
                             } else {
