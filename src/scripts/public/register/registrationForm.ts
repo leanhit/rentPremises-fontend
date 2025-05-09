@@ -33,8 +33,7 @@ export default {
         const form = reactive({
             email: 'theanh.it@gmail.com',
             password: '123',
-            systemRole: 'USER', // Vai trò mặc định là 'USER'
-            businessRoles: ['RENT'], // Vai trò mặc định là 'RENT'
+            role: 'USER', // Vai trò mặc định là 'USER'
             username: 'theanh.it', // Tên đăng nhập
             fullName: 'Lê Thế Anh', // Họ và tên
             dateOfBirth: '', // Ngày sinh
@@ -71,17 +70,17 @@ export default {
                 const res = await usersApi.register(form);
                 if (res.status === 200) {
                     localStorage.setItem('accessToken', res.data.token);
-                    localStorage.setItem('systemRole', res.data.systemRole);
+                    localStorage.setItem('role', res.data.role);
 
                     const token = res.data.token;
-                    const user = res.data; // nếu server trả về user + systemRole
+                    const user = res.data; // nếu server trả về user + role
 
                     authStore.login(token, user);
 
                     // 👇 redirect bằng router.push()
-                    if (form.systemRole === 'ADMIN') {
+                    if (form.role === 'ADMIN') {
                         router.push('/admin/dashboard');
-                    } else if (form.systemRole === 'USER') {
+                    } else if (form.role === 'USER') {
                         router.push('/');
                     } else {
                         router.push('/login');

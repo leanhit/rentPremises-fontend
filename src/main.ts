@@ -5,14 +5,15 @@ import * as ElementPlusIconsVue from '@element-plus/icons-vue';
 import 'element-plus/dist/index.css';
 import axios from 'axios';
 import App from './App.vue';
-import router from './router'; 
-import { Waypoint } from 'vue-waypoint'; 
+import router from './router';
+import { Waypoint } from 'vue-waypoint';
 import VueLazyLoad from 'vue3-lazyload';
-import TextClamp from 'vue3-text-clamp'; 
+import TextClamp from 'vue3-text-clamp';
 import SkeletonBoxWithoutLoading from '@/components/SkeletonBoxWithoutLoading.vue';
 import moment from 'moment';
 import './assets/styles.css';
 import i18n from "./i18n";
+//import VueGoogleMaps from '@fawmi/vue-google-maps';
 
 const axiosInstance = axios.create({
     baseURL: import.meta.env.VITE_API_URL,
@@ -25,10 +26,16 @@ const axiosInstance = axios.create({
 const app = createApp(App);
 app.use(createPinia());
 app.use(router);
-app.use(ElementPlus); 
+app.use(ElementPlus);
 app.use(VueLazyLoad);
 app.use(TextClamp);
 app.use(i18n);
+// app.use(VueGoogleMaps, {
+//     load: {
+//         key: 'YOUR_GOOGLE_MAPS_API_KEY', // 🔑 thay bằng API Key của bạn
+//         libraries: 'places',
+//     },
+// });
 app.component(
     'no-data',
     defineAsyncComponent({
@@ -36,20 +43,20 @@ app.component(
         loadingComponent: SkeletonBoxWithoutLoading,
     })
 );
-app.component('Waypoint', Waypoint); 
+app.component('Waypoint', Waypoint);
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
     app.component(key, component);
-} 
+}
 
 app.directive('highlight', {
     beforeMount(el, binding) {
-        try{
-            if(binding && binding.value && binding.value.keyword && binding.value.keyword !== ''){
-                el.innerHTML = el.innerHTML.replace(new RegExp(binding.value.keyword, "gi"), (match:any) => {
+        try {
+            if (binding && binding.value && binding.value.keyword && binding.value.keyword !== '') {
+                el.innerHTML = el.innerHTML.replace(new RegExp(binding.value.keyword, "gi"), (match: any) => {
                     return '<span class="highlightText">' + match + '</span>';
                 });//el.innerHTML.replace(binding.value.keyword, `<em>${binding.value.keyword}</em>`);
             }
-        }catch{
+        } catch {
 
         }
     }
@@ -74,16 +81,16 @@ app.config.globalProperties.$filters = {
             sameElse: 'DD/MM/YYYY HH:mm:ss',
         });
     },
-    durationToStr(startDate:string, endDate:string) {
+    durationToStr(startDate: string, endDate: string) {
         // TIP: to find current time in milliseconds, use:
         // var  current_time_milliseconds = new Date().getTime();
         var diff = moment.duration(moment(startDate).diff(moment(endDate)));
-        let milliseconds:number = diff.asMilliseconds();
-    
-        function numberEnding (number:number) {
+        let milliseconds: number = diff.asMilliseconds();
+
+        function numberEnding(number: number) {
             return (number > 1) ? 's' : '';
         }
-    
+
         var temp = Math.floor(milliseconds / 1000);
         var years = Math.floor(temp / 31536000);
         if (years) {
@@ -111,12 +118,12 @@ app.config.globalProperties.$filters = {
 };
 app.config.globalProperties.$router = router;
 
-axios.defaults.headers.post['Content-Type'] = 'application/json'; 
+axios.defaults.headers.post['Content-Type'] = 'application/json';
 axios.defaults.baseURL = import.meta.env.VITE_API_URL;
 axios.interceptors.request.use(
     function (config) {
         const source = axios.CancelToken.source();
-        config.cancelToken = source.token; 
+        config.cancelToken = source.token;
         return config;
     },
     function (err) {

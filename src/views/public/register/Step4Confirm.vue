@@ -26,13 +26,6 @@
             </div>
 
             <div class="confirm-item">
-                <span class="label">Vai trò:</span>
-                <span class="value">{{
-                    props.form.role === 'RENT' ? 'Thuê đất' : 'Chủ đất'
-                }}</span>
-            </div>
-
-            <div class="confirm-item">
                 <span class="label">Giới tính:</span>
                 <span class="value">{{
                     props.form.gender === 'MALE' ? 'Nam' : 'Nữ'

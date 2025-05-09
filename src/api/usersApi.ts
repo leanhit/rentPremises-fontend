@@ -1,8 +1,10 @@
+// src/api/usersApi.ts
 import axios from 'axios';
+import api from '@/api/instance';
 
 export const usersApi = {
     getUserByID() {
-        return axios.get(`/auth/users/`);
+        return api.get(`/auth/users/`);
     },
 
     login(params: any) {
@@ -14,14 +16,22 @@ export const usersApi = {
     },
 
     checkUsername(username: string) {
-        return axios.get(`/auth/check-username`, {
+        return api.get(`/auth/check-username`, {
             params: { username },
         });
     },
 
     checkEmail(email: string) {
-        return axios.get(`/auth/check-email`, {
+        return api.get(`/auth/check-email`, {
             params: { email },
         });
+    },
+
+    getProfile() {
+        return api.get(`/auth/profile`);
+    },
+
+    updateProfile(params: any) {
+        return api.put(`/auth/profile`, params);
     },
 };

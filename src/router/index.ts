@@ -7,6 +7,7 @@ import Login from '@/views/public/Login.vue';
 import Register from '@/views/public/register/RegistrationForm.vue';
 import AdminDashboard from '@/views/private/admin/dashboard/index.vue';
 import Lease from '@/views/private/user/lease/Index.vue';
+import Profile from '@/views/private/user/profile/Index.vue';
 
 const routes = [
     {
@@ -37,6 +38,12 @@ const routes = [
         //meta: { requiresGuest: true },
     },
     {
+        path: '/profile',
+        name: 'profile',
+        component: Profile,
+        //meta: { requiresGuest: true },
+    },
+    {
         path: '/admin',
         component: AdminDashboard,
         name: 'LayoutZoter',
@@ -53,7 +60,7 @@ const routes = [
                 path: 'redirect-by-role',
                 name: 'redirect-by-role',
                 beforeEnter: (to, from, next) => {
-                    const role = localStorage.getItem('systemRole');
+                    const role = localStorage.getItem('role');
                     if (role === 'ADMIN') {
                         next({ name: 'dashboard' });
                     } else if (role === 'USER') {
@@ -76,14 +83,14 @@ router.beforeEach((to, from, next) => {
     const authStore = useAuthStore();
 
     const isAuthenticated = authStore.isLoggedIn; // reactive
-    const systemRole = authStore.user?.systemRole; // ví dụ: 'ADMIN' | 'USER'
+    const role = authStore.user?.role; // ví dụ: 'ADMIN' | 'USER'
 
     if (to.meta.requiresAuth && !isAuthenticated) {
         next('/login');
     } else if (to.meta.requiresGuest && isAuthenticated) {
-        if (systemRole === 'ADMIN' && to.path !== '/admin/dashboard') {
+        if (role === 'ADMIN' && to.path !== '/admin/dashboard') {
             next('/admin/dashboard');
-        } else if (systemRole === 'USER' && to.path !== '/') {
+        } else if (role === 'USER' && to.path !== '/') {
             next('/');
         } else {
             next();

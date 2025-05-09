@@ -37,20 +37,6 @@
                 required
                 placeholder="Nhập địa chỉ" />
         </div>
-
-        <div class="form-step-group">
-            <label for="role">Vai trò</label>
-            <select
-                v-model="props.form.role"
-                id="role"
-                name="role"
-                class="form-step-inp"
-                required>
-                <option value="">Chọn vai trò</option>
-                <option value="RENT">Thuê đất</option>
-                <option value="OWNER">Chủ đất</option>
-            </select>
-        </div>
     </div>
 </template>
 

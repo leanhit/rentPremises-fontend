@@ -7,7 +7,6 @@ export default {
     props: ['form'],
     setup(props: any, context: any) {
         const { t } = useI18n();
-        const businessRoles = ref('RENT');
 
         const validateEmailFormat = (email: string) => {
             const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -60,17 +59,12 @@ export default {
             return true;
         };
 
-        watch(businessRoles, (newValue) => {
-            props.form.businessRoles = [newValue]; // 👈 cập nhật form reactive
-        });
-
         context.expose({
             checkBeforeNext,
         });
 
         return {
             t,
-            businessRoles,
             props,
         };
     },

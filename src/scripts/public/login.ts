@@ -32,13 +32,13 @@ export default {
                     .then((response) => {
                         if (response.status === 200) {
                             const token = response.data.token;
-                            const user = response.data; // Giả sử trong response đã có user info và systemRole
+                            const user = response.data; // Giả sử trong response đã có user info và role
 
                             authStore.login(token, user); // ✅ Gọi store login
 
-                            if (response.data.systemRole === 'ADMIN') {
+                            if (response.data.role === 'ADMIN') {
                                 router.push('/admin/dashboard');
-                            } else if (response.data.systemRole === 'USER') {
+                            } else if (response.data.role === 'USER') {
                                 router.push('/');
                             } else {
                                 router.push('/login');

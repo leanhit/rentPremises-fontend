@@ -39,7 +39,7 @@
         <!-- Right Menu -->
         <div class="flex items-center gap-4">
             <!-- Host Button -->
-            <button class="text-sm font-semibold">Cho thuê mặt bằng</button>
+            <a href="\lease" class="text-sm font-semibold">Cho thuê mặt bằng</a>
 
             <!-- Globe Icon -->
             <div class="relative" ref="globeMenu">
@@ -118,7 +118,7 @@
                         <template v-if="isAuthenticated">
                             <li
                                 class="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer">
-                                Profile
+                                <a href="/profile">Profile</a>
                             </li>
                             <li
                                 class="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer">

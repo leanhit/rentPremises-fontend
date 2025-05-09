@@ -8,7 +8,12 @@
                 active: step === n,
                 success: n < step || (n === 8 && step8Done),
             }">
-            <div class="step-icon">{{ n }}</div>
+            <div class="step-icon">
+                <span v-if="!(n < step || (n === 8 && step8Done))">{{
+                    n
+                }}</span>
+                <span v-else>✓</span>
+            </div>
             <div class="step-text">Step {{ n }}</div>
         </div>
     </div>

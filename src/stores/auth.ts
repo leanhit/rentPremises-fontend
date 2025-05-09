@@ -5,7 +5,7 @@ export const useAuthStore = defineStore('auth', {
     state: () => ({
         token: localStorage.getItem('accessToken'),
         user: JSON.parse(localStorage.getItem('user') || 'null'),
-        systemRole: localStorage.getItem('systemRole'),
+        role: localStorage.getItem('role'),
     }),
     getters: {
         isLoggedIn: (state) => !!state.token,
@@ -14,20 +14,20 @@ export const useAuthStore = defineStore('auth', {
         login(token: string, user: any) {
             this.token = token;
             this.user = user;
-            this.systemRole = user.systemRole;
+            this.role = user.role;
 
             localStorage.setItem('accessToken', token);
             localStorage.setItem('user', JSON.stringify(user));
-            localStorage.setItem('systemRole', user.systemRole);
+            localStorage.setItem('role', user.role);
         },
         logout() {
             this.token = null;
             this.user = null;
-            this.systemRole = null;
+            this.role = null;
 
             localStorage.removeItem('accessToken');
             localStorage.removeItem('user');
-            localStorage.removeItem('systemRole');
+            localStorage.removeItem('role');
         },
     },
 });
