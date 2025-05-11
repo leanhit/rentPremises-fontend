@@ -31,14 +31,17 @@ export default {
         const step = ref(1);
         const step4Done = ref(false);
         const form = reactive({
-            email: 'theanh.it@gmail.com',
+            email: 'theanh1.it@gmail.com',
             password: '123',
             role: 'USER', // Vai trò mặc định là 'USER'
-            username: 'theanh.it', // Tên đăng nhập
+            username: 'theanh1.it', // Tên đăng nhập
             fullName: 'Lê Thế Anh', // Họ và tên
             dateOfBirth: '', // Ngày sinh
             phone: '0976218203', // Số điện thoại
-            address: 'nhà tôi', // Địa chỉ
+            province: '',
+            district: '',
+            ward: '',
+            detail: 'nhà tôi',
             gender: 'OTHER', // Giới tính
         });
 

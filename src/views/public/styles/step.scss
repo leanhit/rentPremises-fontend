@@ -166,3 +166,9 @@ $primary-hover: #1385b7;
     }
   }
 }
+
+@media (max-width: 768px) {
+  .confirm-grid {
+    grid-template-columns: 1fr;
+  }
+}
