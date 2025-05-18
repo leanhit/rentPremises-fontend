@@ -31,7 +31,12 @@
                                     value="Sign In" />
                                 <p>
                                     Don't have an account?
-                                    <a href="/register">Sign up here</a>
+                                    <router-link
+                                        to="/register"
+                                        class="text-blue-600 hover:underline">
+                                        Sign up
+                                    </router-link>
+                                    here
                                 </p>
                             </form>
                         </div>

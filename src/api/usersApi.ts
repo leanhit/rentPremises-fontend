@@ -16,13 +16,13 @@ export const usersApi = {
     },
 
     checkUsername(username: string) {
-        return api.get(`/auth/check-username`, {
+        return axios.get(`/auth/check-username`, {
             params: { username },
         });
     },
 
     checkEmail(email: string) {
-        return api.get(`/auth/check-email`, {
+        return axios.get(`/auth/check-email`, {
             params: { email },
         });
     },
@@ -34,4 +34,15 @@ export const usersApi = {
     updateProfile(params: any) {
         return api.put(`/auth/profile`, params);
     },
+
+    updateAvatar(formData: FormData) {
+        // for (const [key, value] of formData.entries()) {
+        //     console.log(`FormData entry: ${key}`, value);
+        // }
+        return api.put('/auth/profile/avatar', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+    }
 };

@@ -31,10 +31,10 @@ export default {
         const step = ref(1);
         const step4Done = ref(false);
         const form = reactive({
-            email: 'theanh1.it@gmail.com',
+            email: 'theanh.it@gmail.com',
             password: '123',
             role: 'USER', // Vai trò mặc định là 'USER'
-            username: 'theanh1.it', // Tên đăng nhập
+            username: 'theanh.it', // Tên đăng nhập
             fullName: 'Lê Thế Anh', // Họ và tên
             dateOfBirth: '', // Ngày sinh
             phone: '0976218203', // Số điện thoại
@@ -72,13 +72,10 @@ export default {
             try {
                 const res = await usersApi.register(form);
                 if (res.status === 200) {
-                    localStorage.setItem('accessToken', res.data.token);
-                    localStorage.setItem('role', res.data.role);
-
                     const token = res.data.token;
-                    const user = res.data; // nếu server trả về user + role
+                    const user = res.data.user; // Giả sử trong response đã có user info và role
 
-                    authStore.login(token, user);
+                    authStore.login(token, user); // ✅ Gọi store login
 
                     // 👇 redirect bằng router.push()
                     if (form.role === 'ADMIN') {

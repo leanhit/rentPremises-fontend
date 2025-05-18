@@ -1,11 +1,11 @@
 import { ref, onMounted, onBeforeUnmount, computed } from 'vue';
-import { useAuthStore } from '@/stores/auth';
 import { storeToRefs } from 'pinia';
 import { useRouter, useRoute } from 'vue-router';
 import { useSearchStore } from '@/stores/search';
 import { useI18n } from 'vue-i18n';
 import local from './components/supportedLocales';
 import SearchBox from '@/views/layout/topnav/components/SearchBox.vue';
+import { useAuthStore } from '@/stores/auth';
 export default {
     components: {
         SearchBox,
@@ -24,6 +24,8 @@ export default {
             'https://www.svgrepo.com/show/384674/account-avatar-profile-user-11.svg'
         );
 
+        
+        //console.log('user', user.value);
         // Dropdown visibility
         const dropdownVisible = ref(false);
         const globeDropdownVisible = ref(false);
@@ -128,6 +130,7 @@ export default {
             local,
             searchQuery,
             updateSearch,
+            user
         };
     }
 };

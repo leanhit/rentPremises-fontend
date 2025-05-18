@@ -1,38 +1,75 @@
 <template>
-    <div class="space-y-4">
-        <div>
-            <label class="block font-medium">Full Name</label>
-            <input v-model="form.fullName" class="input" />
-        </div>
+    <el-card class="shadow-sm border border-gray-200 rounded-xl">
+        <template #header>
+            <h2 class="text-lg font-semibold text-gray-800">
+                👤 Thông tin cá nhân
+            </h2>
+        </template>
 
-        <div>
-            <label class="block font-medium">Birthday</label>
-            <input v-model="form.dateOfBirth" type="date" class="input" />
-        </div>
+        <div class="space-y-4">
+            <!-- Họ tên -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                    Họ và tên
+                </label>
+                <el-input
+                    v-model="form.fullName"
+                    placeholder="Nhập họ và tên"
+                    class="w-full" />
+            </div>
 
-        <div>
-            <label class="block font-medium">Gender</label>
-            <select v-model="form.gender" class="input">
-                <option value="">-- Chọn giới tính --</option>
-                <option value="MALE">Nam</option>
-                <option value="FEMALE">Nữ</option>
-                <option value="OTHER">Khác</option>
-            </select>
-        </div>
+            <!-- Ngày sinh -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                    Ngày sinh
+                </label>
+                <el-date-picker
+                    v-model="form.dateOfBirth"
+                    type="date"
+                    format="YYYY-MM-DD"
+                    value-format="YYYY-MM-DD"
+                    placeholder="Chọn ngày sinh"
+                    class="w-full" />
+            </div>
 
-        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">
-            Cập nhật
-        </button>
-    </div>
+            <!-- Giới tính -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                    Giới tính
+                </label>
+                <el-select
+                    v-model="form.gender"
+                    placeholder="Chọn giới tính"
+                    class="w-full">
+                    <el-option label="Nam" value="MALE" />
+                    <el-option label="Nữ" value="FEMALE" />
+                    <el-option label="Khác" value="OTHER" />
+                </el-select>
+            </div>
+
+            <!-- Nút lưu -->
+            <div class="text-right mt-4">
+                <el-button
+                    type="primary"
+                    :loading="loading"
+                    @click="submit"
+                    class="px-6">
+                    💾 Cập nhật
+                </el-button>
+            </div>
+        </div>
+    </el-card>
 </template>
 
-<script setup>
-import { reactive, watch } from 'vue';
+<script setup lang="ts">
+import { reactive, watch, ref } from 'vue';
 import { usersApi } from '@/api/usersApi';
 import { ElMessage } from 'element-plus';
 
-const props = defineProps({ user: Object });
+const props = defineProps<{ user: any }>();
 const emit = defineEmits(['updated']);
+
+const loading = ref(false);
 
 const form = reactive({
     fullName: '',
@@ -44,26 +81,31 @@ watch(
     () => props.user,
     (val) => {
         if (val) {
-            form.fullName = val.fullName;
-            form.dateOfBirth = val.dateOfBirth;
-            form.gender = val.gender;
+            form.fullName = val.fullName || '';
+            form.dateOfBirth = val.dateOfBirth || '';
+            form.gender = val.gender || '';
         }
     },
     { immediate: true }
 );
 
+console.log('form', form, 'user', props.user);
+
 const submit = async () => {
+    loading.value = true;
     try {
-        usersApi.updateProfile({
+        await usersApi.updateProfile({
             fullName: form.fullName,
             dateOfBirth: form.dateOfBirth,
             gender: form.gender,
         });
-        ElMessage.success('Cập nhật thành công');
+        ElMessage.success('✅ Cập nhật thành công!');
         emit('updated');
     } catch (err) {
-        ElMessage.error('Đã xảy ra lỗi khi cập nhật');
+        console.error(err);
+        ElMessage.error('❌ Đã xảy ra lỗi khi cập nhật!');
+    } finally {
+        loading.value = false;
     }
 };
 </script>
-

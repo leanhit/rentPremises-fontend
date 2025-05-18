@@ -2,9 +2,9 @@
     <nav
         class="flex items-center justify-between p-4 border-b shadow-sm bg-white sticky top-0 z-50">
         <!-- Logo -->
-        <div class="text-2xl font-bold text-pink-600">
+        <router-link to="/" class="text-2xl font-bold text-pink-600">
             <span>airbnb</span>
-        </div>
+        </router-link>
 
         <!-- Search -->
         <!--<div
@@ -39,7 +39,9 @@
         <!-- Right Menu -->
         <div class="flex items-center gap-4">
             <!-- Host Button -->
-            <a href="\lease" class="text-sm font-semibold">Cho thuê mặt bằng</a>
+            <router-link to="/lease" class="text-sm font-semibold">
+                Cho thuê mặt bằng
+            </router-link>
 
             <!-- Globe Icon -->
             <div class="relative" ref="globeMenu">
@@ -113,21 +115,44 @@
 
                 <div
                     v-if="dropdownVisible"
-                    class="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+                    class="absolute right-0 mt-2 w-64 bg-white border border-gray-300 rounded-lg shadow-xl z-50">
                     <ul class="py-2">
                         <template v-if="isAuthenticated">
                             <li
-                                class="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer">
-                                <a href="/profile">Profile</a>
+                                class="p-3 border-b border-gray-200 flex items-center space-x-3">
+                                <img
+                                    :src="userAvatarUrl"
+                                    alt="Avatar"
+                                    class="w-10 h-10 rounded-full" />
+                                <div>
+                                    <p class="font-semibold text-gray-800">{{ user.username }}</p>
+                                </div>
                             </li>
                             <li
                                 class="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer">
-                                Your Listings
+                                <router-link
+                                    to="/profile"
+                                    class="block w-full h-full">
+                                    Profile
+                                </router-link>
                             </li>
                             <li
                                 class="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer">
-                                Settings
+                                <router-link
+                                    to="/my-listings"
+                                    class="block w-full h-full">
+                                    Your Listings
+                                </router-link>
                             </li>
+                            <li
+                                class="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer">
+                                <router-link
+                                    to="/settings"
+                                    class="block w-full h-full">
+                                    Settings
+                                </router-link>
+                            </li>
+
                             <li class="border-t my-2"></li>
                             <li
                                 @click="handleLogout"
@@ -138,16 +163,28 @@
                         <template v-else>
                             <li
                                 class="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer">
-                                <a href="/login">Login</a>
+                                <router-link
+                                    to="/login"
+                                    class="block w-full h-full">
+                                    Login
+                                </router-link>
                             </li>
                             <li
                                 class="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer">
-                                <a href="/register">Sign Up</a>
+                                <router-link
+                                    to="/register"
+                                    class="block w-full h-full">
+                                    Sign Up
+                                </router-link>
                             </li>
                             <li class="border-t my-2"></li>
                             <li
                                 class="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer">
-                                <a href="/help">Help</a>
+                                <router-link
+                                    to="/help"
+                                    class="block w-full h-full">
+                                    Help
+                                </router-link>
                             </li>
                         </template>
                     </ul>

@@ -54,17 +54,25 @@ export default {
         const form = reactive({
             propertyType: 'apartment',
             maxGuests: 1,
-            location: {
-                province: '',
-                district: '',
-                ward: '',
-                detail: '',
-            },
+            province: '',
+            district: '',
+            ward: '',
+            detail: 'Nhà tôi',
             amenities: [],
             photos: [],
-            pricing: {},
-            availability: {},
-            bookingOptions: {},
+            pricing: {
+                pricePerNight: 0,
+                cleaningFee: 0,
+            },
+            availability: {
+                startDate: '',
+                endDate: '',
+                minStay: 1,
+            },
+            bookingOptions: {
+                type: 'instant',
+                minNights: 1,
+            },
             review: {},
         });
 

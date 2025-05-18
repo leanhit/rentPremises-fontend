@@ -5,7 +5,7 @@
         <div class="mb-4">
             <label class="block mb-1">Tỉnh/Thành phố:</label>
             <el-select
-                v-model="form.location.province"
+                v-model="form.province"
                 placeholder="Chọn tỉnh/thành"
                 filterable
                 @change="onProvinceChange"
@@ -21,7 +21,7 @@
         <div class="mb-4">
             <label class="block mb-1">Quận/Huyện:</label>
             <el-select
-                v-model="form.location.district"
+                v-model="form.district"
                 placeholder="Chọn quận/huyện"
                 filterable
                 @change="onDistrictChange"
@@ -38,7 +38,7 @@
         <div class="mb-4">
             <label class="block mb-1">Phường/Xã:</label>
             <el-select
-                v-model="form.location.ward"
+                v-model="form.ward"
                 placeholder="Chọn phường/xã"
                 filterable
                 class="w-full"
@@ -54,73 +54,48 @@
         <div class="mb-4">
             <label class="block mb-1">Địa chỉ chi tiết:</label>
             <el-input
-                v-model="form.location.detail"
+                v-model="form.detail"
                 placeholder="Số nhà, tên đường..." />
         </div>
     </div>
 </template>
 
 <script lang="ts">
-import { ref, onMounted } from 'vue';
-import axios from 'axios';
-import { ElMessage } from 'element-plus';
+import { onMounted } from 'vue';
+import { useAddressStore } from '@/stores/addressStore';
+import { storeToRefs } from 'pinia';
+import { useI18n } from 'vue-i18n';
 
 export default {
     props: ['form'],
     setup(props, { expose }) {
-        const provinces = ref([]);
-        const districts = ref([]);
-        const wards = ref([]);
-
-        const fetchProvinces = async () => {
-            try {
-                const res = await axios.get(
-                    'https://provinces.open-api.vn/api/p/'
-                );
-                provinces.value = res.data;
-            } catch (err) {
-                ElMessage.error('Không thể tải tỉnh/thành phố');
-            }
-        };
-
-        const fetchDistricts = async (provinceCode: string) => {
-            try {
-                const res = await axios.get(
-                    `https://provinces.open-api.vn/api/p/${provinceCode}?depth=2`
-                );
-                districts.value = res.data.districts || [];
-            } catch (err) {
-                ElMessage.error('Không thể tải quận/huyện');
-            }
-        };
-
-        const fetchWards = async (districtCode: string) => {
-            try {
-                const res = await axios.get(
-                    `https://provinces.open-api.vn/api/d/${districtCode}?depth=2`
-                );
-                wards.value = res.data.wards || [];
-            } catch (err) {
-                ElMessage.error('Không thể tải phường/xã');
-            }
-        };
+        const { t } = useI18n();
+        const addressStoreInstance = useAddressStore();
+        const { provinces, districts, wards } =
+            storeToRefs(addressStoreInstance);
+        const { fetchProvinces, fetchDistricts, fetchWards } =
+            addressStoreInstance;
 
         const onProvinceChange = (code: string) => {
-            props.form.location.district = '';
-            props.form.location.ward = '';
+            props.form.district = '';
+            props.form.ward = '';
             districts.value = [];
             wards.value = [];
             if (code) fetchDistricts(code);
         };
 
         const onDistrictChange = (code: string) => {
-            props.form.location.ward = '';
+            props.form.ward = '';
             wards.value = [];
             if (code) fetchWards(code);
         };
 
+        onMounted(() => {
+            fetchProvinces();
+        });
+
         const checkBeforeNext = async () => {
-            const { province, district, ward, detail } = props.form.location;
+            const { province, district, ward, detail } = props.form;
             if (!province || !district || !ward || !detail.trim()) {
                 ElMessage.warning('Vui lòng điền đầy đủ thông tin vị trí.');
                 return false;

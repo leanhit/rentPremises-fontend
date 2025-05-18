@@ -1,6 +1,8 @@
 <template>
     <div>
-        <h2 class="text-xl font-semibold mb-4">Step 8: Xác nhận lại thông tin</h2>
+        <h2 class="text-xl font-semibold mb-4">
+            Step 8: Xác nhận lại thông tin
+        </h2>
 
         <!-- Loại chỗ ở -->
         <div class="mb-4">
@@ -22,7 +24,7 @@
         <div class="mb-4">
             <label class="block mb-1">Địa chỉ:</label>
             <p class="border border-gray-300 rounded px-3 py-2 bg-gray-50">
-                {{ form.location.detail }}, {{ form.location.ward }}, {{ form.location.district }}, {{ form.location.province }}
+                {{ fullAddress }}
             </p>
         </div>
 
@@ -33,8 +35,7 @@
                 <span
                     v-for="(amenity, index) in amenityLabels"
                     :key="index"
-                    class="bg-gray-200 rounded px-3 py-1 text-sm"
-                >
+                    class="bg-gray-200 rounded px-3 py-1 text-sm">
                     {{ amenity }}
                 </span>
             </div>
@@ -49,25 +50,39 @@
                     :key="index"
                     :src="photo"
                     alt="photo"
-                    class="w-24 h-24 object-cover rounded border"
-                />
+                    class="w-24 h-24 object-cover rounded border" />
             </div>
         </div>
 
         <!-- Giá -->
         <div class="mb-4">
-            <label class="block mb-1">Giá:</label>
-            <p class="border border-gray-300 rounded px-3 py-2 bg-gray-50">
-                {{ formatCurrency(form.pricing.price) }}
-            </p>
+            <ul class="bg-gray-100 p-4 rounded text-sm space-y-1">
+                <li>
+                    <strong>Giá mỗi đêm:</strong>
+                    <span>{{
+                        formatCurrency(form.pricing.pricePerNight)
+                    }}</span>
+                </li>
+                <li>
+                    <strong>Phí dọn dẹp:</strong>
+                    <span>{{ formatCurrency(form.pricing.cleaningFee) }}</span>
+                </li>
+            </ul>
         </div>
 
         <!-- Tùy chọn đặt phòng -->
         <div class="mb-4">
             <label class="block mb-1">Tùy chọn đặt phòng:</label>
-            <pre class="bg-gray-100 p-4 rounded text-sm">
-{{ JSON.stringify(form.bookingOptions, null, 2) }}
-            </pre>
+            <ul class="bg-gray-100 p-4 rounded text-sm space-y-1">
+                <li>
+                    <strong>Hình thức đặt phòng:</strong>
+                    <span>{{ form.bookingOptions.type }}</span>
+                </li>
+                <li>
+                    <strong>Số đêm tối thiểu:</strong>
+                    <span>{{ form.bookingOptions.minNights }}</span>
+                </li>
+            </ul>
         </div>
 
         <div class="mt-4 text-green-700 font-medium">
@@ -77,12 +92,26 @@
 </template>
 
 <script lang="ts">
+import { ref, onMounted } from 'vue';
+import { useAddressStore } from '@/stores/addressStore';
 import { useI18n } from 'vue-i18n';
 
 export default {
     props: ['form'],
     setup(props: any, context: any) {
         const { t } = useI18n();
+        const addressStore = useAddressStore();
+        const fullAddress = ref('');
+        const { getFullAddress } = addressStore;
+
+        onMounted(async () => {
+            fullAddress.value = await getFullAddress(
+                props.form.province,
+                props.form.district,
+                props.form.ward,
+                props.form.detail
+            );
+        });
 
         // Ánh xạ loại chỗ ở
         const propertyTypeMap: Record<string, string> = {
@@ -103,10 +132,13 @@ export default {
         };
 
         // Label loại chỗ ở
-        const propertyTypeLabel = propertyTypeMap[props.form.propertyType] || props.form.propertyType;
+        const propertyTypeLabel =
+            propertyTypeMap[props.form.propertyType] || props.form.propertyType;
 
         // Danh sách label tiện ích
-        const amenityLabels = props.form.amenities.map((key: string) => amenityMap[key] || key);
+        const amenityLabels = props.form.amenities.map(
+            (key: string) => amenityMap[key] || key
+        );
 
         const formatCurrency = (price: number) => {
             if (!price) return '0';
@@ -124,6 +156,7 @@ export default {
             propertyTypeLabel,
             amenityLabels,
             formatCurrency,
+            fullAddress,
             t,
         };
     },

@@ -40,7 +40,7 @@
             <!-- Địa chỉ cuối và chiếm toàn bộ chiều ngang -->
             <div class="confirm-item full-width">
                 <span class="label">Địa chỉ:</span>
-                <span class="value">{{ getFullAddress() }}</span>
+                <span class="value">{{ fullAddress }}</span>
             </div>
         </div>
     </div>

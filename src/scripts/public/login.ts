@@ -32,8 +32,9 @@ export default {
                     .then((response) => {
                         if (response.status === 200) {
                             const token = response.data.token;
-                            const user = response.data; // Giả sử trong response đã có user info và role
+                            const user = response.data.user; // Giả sử trong response đã có user info và role
 
+                            console.log('data', response.data.user);
                             authStore.login(token, user); // ✅ Gọi store login
 
                             if (response.data.role === 'ADMIN') {

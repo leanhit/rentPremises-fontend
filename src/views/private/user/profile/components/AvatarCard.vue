@@ -1,46 +1,46 @@
 <template>
-    <div
-        class="bg-white shadow rounded-lg p-6 mb-6 flex justify-between items-center">
-        <!-- Left side: Update button -->
-        <div class="flex items-center gap-4">
-            <!-- Avatar preview -->
-            <img
-                :src="previewAvatar"
-                class="w-20 h-20 rounded-full object-cover border border-gray-300"
-                alt="User Avatar" />
+    <el-card class="mb-6">
+        <div class="flex items-center justify-between">
+            <!-- Avatar preview + Upload -->
+            <div class="flex items-center gap-4">
+                <!-- Preview -->
+                <el-image
+                    :src="previewAvatar"
+                    fit="cover"
+                    class="w-40 h-40 rounded-full border" />
 
-            <!-- File input -->
-            <div class="text-right">
-                <label
-                    for="avatarUpload"
-                    class="cursor-pointer bg-gray-100 text-gray-800 px-3 py-1.5 rounded border border-gray-300 hover:bg-gray-200 transition block w-fit">
-                    Chọn ảnh
-                </label>
-                <input
-                    id="avatarUpload"
-                    type="file"
-                    accept="image/*"
-                    class="hidden"
-                    @change="onFileChange" />
-                <p class="text-sm text-gray-500 mt-1" v-if="selectedFileName">
+                <!-- Upload -->
+                <el-upload
+                    class="avatar-uploader"
+                    :auto-upload="false"
+                    :show-file-list="false"
+                    :on-change="onFileChange"
+                    accept="image/*">
+                    <el-button type="primary" plain>Chọn ảnh</el-button>
+                </el-upload>
+
+                <div class="text-sm text-gray-500" v-if="selectedFileName">
                     {{ selectedFileName }}
-                </p>
+                </div>
             </div>
-        </div>
 
-        <!-- Right side: Avatar preview + File input -->
-        <div>
-            <button
-                @click="submitAvatar"
-                class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
+            <!-- Submit -->
+            <el-button
+                type="success"
+                :loading="isUploading"
+                :disabled="!selectedFile"
+                @click="submitAvatar">
                 Đổi avatar
-            </button>
+            </el-button>
         </div>
-    </div>
+    </el-card>
 </template>
 
-<script setup>
-import { ref, computed } from 'vue';
+<script setup lang="ts">
+import { ref, computed, watch, onBeforeUnmount } from 'vue';
+import { usersApi } from '@/api/usersApi';
+import { useAuthStore } from '@/stores/auth';
+import { ElMessage } from 'element-plus';
 
 const props = defineProps({
     user: {
@@ -49,33 +49,112 @@ const props = defineProps({
     },
 });
 
-const selectedFile = ref(null);
+const selectedFile = ref<File | null>(null);
 const selectedFileName = ref('');
+const isUploading = ref(false);
 
-const previewAvatar = computed(() => {
-    return selectedFile.value
-        ? URL.createObjectURL(selectedFile.value)
-        : props.user?.avatar || 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS5szWL45_SSCxUWSwLJa_Ptp9GPUbM4dhOaA&s';
+// ref lưu URL avatar hiện tại, khởi tạo bằng props.user.avatar
+const userAvatar = ref(
+    props.user?.avatar || 'https://via.placeholder.com/80x80?text=Avatar'
+);
+
+// ref lưu object URL tạm để preview khi chọn file mới
+const objectUrl = ref<string | null>(null);
+const authStore = useAuthStore();
+
+// watch selectedFile để tạo và revoke object URL đúng cách
+watch(selectedFile, (newFile, oldFile) => {
+    if (objectUrl.value) {
+        URL.revokeObjectURL(objectUrl.value);
+        objectUrl.value = null;
+    }
+    if (newFile) {
+        objectUrl.value = URL.createObjectURL(newFile);
+    }
 });
 
-function onFileChange(event) {
-    const file = event.target.files[0];
-    if (file) {
-        selectedFile.value = file;
-        selectedFileName.value = file.name;
+// cleanup khi component bị unmount
+onBeforeUnmount(() => {
+    if (objectUrl.value) {
+        URL.revokeObjectURL(objectUrl.value);
     }
-}
+});
 
-function submitAvatar() {
-    if (!selectedFile.value) {
-        alert('Bạn chưa chọn ảnh mới!');
+// computed hiển thị avatar preview
+const previewAvatar = computed(() => {
+    return objectUrl.value || userAvatar.value;
+});
+
+/**
+ * Hàm xử lý khi người dùng chọn file từ el-upload
+ * file argument có dạng { raw: File, name: string, ... }
+ */
+function onFileChange(file: any) {
+    if (!file) {
+        selectedFile.value = null;
+        selectedFileName.value = '';
         return;
     }
 
-    const formData = new FormData();
-    formData.append('avatar', selectedFile.value);
+    // Lấy file thật trong property raw nếu có
+    if (file.raw instanceof File) {
+        selectedFile.value = file.raw;
+        selectedFileName.value = file.name || file.raw.name || '';
+    } else if (file instanceof File) {
+        selectedFile.value = file;
+        selectedFileName.value = file.name || '';
+    } else {
+        selectedFile.value = null;
+        selectedFileName.value = '';
+        console.warn('Invalid file input in onFileChange:', file);
+    }
+}
 
-    console.log('FormData gửi đi:', formData.get('avatar'));
-    alert('Avatar đã được cập nhật (giả lập)');
+async function submitAvatar() {
+    if (!selectedFile.value) {
+        ElMessage.warning('Vui lòng chọn ảnh trước');
+        return;
+    }
+
+    try {
+        isUploading.value = true;
+        const formData = new FormData();
+        //console.log('selectedFile.value:', selectedFile.value);
+
+        formData.append('avatar', selectedFile.value);
+
+        // for (const [key, value] of formData.entries()) {
+        //     console.log(`FormData entry: ${key}`, value);
+        // }
+        const response = await usersApi.updateAvatar(formData);
+        ElMessage.success('🎉 Avatar đã được cập nhật!');
+        const newAvatarUrl = response.data.avatar;
+
+        // Cập nhật avatar mới lên UI
+        userAvatar.value = newAvatarUrl;
+        authStore.updateUserProfile({ avatar: newAvatarUrl });
+        // Reset file đã chọn và xóa object URL cũ
+        resetUploadState();
+    } catch (err) {
+        console.error(err);
+        ElMessage.error('❌ Lỗi khi cập nhật avatar');
+    } finally {
+        isUploading.value = false;
+    }
+}
+
+function resetUploadState() {
+    selectedFile.value = null;
+    selectedFileName.value = '';
+    if (objectUrl.value) {
+        URL.revokeObjectURL(objectUrl.value);
+        objectUrl.value = null;
+    }
 }
 </script>
+
+<style scoped>
+.avatar-uploader {
+    display: inline-block;
+}
+</style>

@@ -4,7 +4,7 @@
         <div class="success-text">
             Tài khoản của bạn đã được tạo thành công!
         </div>
-        <a href="/" class="success-link">Về trang chủ</a>
+        <router-link to="/" class="success-link"> Về trang chủ </router-link>
     </div>
 </template>
 

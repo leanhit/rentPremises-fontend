@@ -1,8 +1,9 @@
-import { ref, onMounted } from 'vue';
+import { onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { ElMessage } from 'element-plus';
-import axios from 'axios';
+import { storeToRefs } from 'pinia'
 import { usersApi } from '@/api/usersApi';
+import { useAddressStore } from '@/stores/addressStore';
 
 export default {
     props: {
@@ -13,10 +14,9 @@ export default {
     },
     setup(props: any, context: any) {
         const { t } = useI18n();
-
-        const provinces = ref([]);
-        const districts = ref([]);
-        const wards = ref([]);
+        const addressStoreInstance = useAddressStore();
+        const { provinces, districts, wards } = storeToRefs(addressStoreInstance);
+        const { fetchProvinces, fetchDistricts, fetchWards } = addressStoreInstance;
 
         const validateEmailFormat = (email: string) => {
             const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -67,37 +67,6 @@ export default {
             return true;
         };
 
-        const fetchProvinces = async () => {
-            try {
-                const res = await axios.get('https://provinces.open-api.vn/api/p/');
-                provinces.value = res.data;
-            } catch (err) {
-                ElMessage.error('Không thể tải tỉnh/thành phố');
-            }
-        };
-
-        const fetchDistricts = async (provinceCode: string) => {
-            try {
-                const res = await axios.get(
-                    `https://provinces.open-api.vn/api/p/${provinceCode}?depth=2`
-                );
-                districts.value = res.data.districts || [];
-            } catch (err) {
-                ElMessage.error('Không thể tải quận/huyện');
-            }
-        };
-
-        const fetchWards = async (districtCode: string) => {
-            try {
-                const res = await axios.get(
-                    `https://provinces.open-api.vn/api/d/${districtCode}?depth=2`
-                );
-                wards.value = res.data.wards || [];
-            } catch (err) {
-                ElMessage.error('Không thể tải phường/xã');
-            }
-        };
-
         const onProvinceChange = (code: string) => {
             props.form.district = '';
             props.form.ward = '';
@@ -126,9 +95,6 @@ export default {
             provinces,
             districts,
             wards,
-            fetchProvinces,
-            fetchDistricts,
-            fetchWards,
             onProvinceChange,
             onDistrictChange,
         };
