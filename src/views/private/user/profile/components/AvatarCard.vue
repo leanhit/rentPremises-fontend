@@ -1,5 +1,8 @@
 <template>
     <el-card class="mb-6">
+        <template #header>
+            <h2 class="text-lg font-semibold text-gray-800">🖼️ Ảnh đại diện</h2>
+        </template>
         <div class="flex items-center justify-between">
             <!-- Avatar preview + Upload -->
             <div class="flex items-center gap-4">
@@ -26,11 +29,12 @@
 
             <!-- Submit -->
             <el-button
-                type="success"
+                type="primary"
                 :loading="isUploading"
                 :disabled="!selectedFile"
-                @click="submitAvatar">
-                Đổi avatar
+                @click="submitAvatar"
+                class="px-6">
+                💾 Cập Nhật
             </el-button>
         </div>
     </el-card>

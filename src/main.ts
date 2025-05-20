@@ -12,10 +12,9 @@ import TextClamp from 'vue3-text-clamp';
 import SkeletonBoxWithoutLoading from '@/components/SkeletonBoxWithoutLoading.vue';
 import moment from 'moment';
 import './assets/styles.css';
-import i18n from "./i18n";
-// import VueGoogleMaps from '@fawmi/vue-google-maps';
+import i18n from './i18n';
+import { useAuthStore } from '@/stores/auth';
 
-// 👉 Tạo app
 const app = createApp(App);
 
 // 👉 Khởi tạo Pinia
@@ -23,7 +22,6 @@ const pinia = createPinia();
 app.use(pinia);
 
 // 👉 Fetch user nếu đã có token
-import { useAuthStore } from '@/stores/auth';
 const authStore = useAuthStore();
 if (authStore.isLoggedIn && !authStore.user) {
     authStore.fetchUser?.();
@@ -35,13 +33,6 @@ app.use(ElementPlus);
 app.use(VueLazyLoad);
 app.use(TextClamp);
 app.use(i18n);
-
-// app.use(VueGoogleMaps, {
-//     load: {
-//         key: 'YOUR_GOOGLE_MAPS_API_KEY',
-//         libraries: 'places',
-//     },
-// });
 
 // 👉 Đăng ký component toàn cục
 app.component(
@@ -60,14 +51,14 @@ for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
 app.directive('highlight', {
     beforeMount(el, binding) {
         try {
-            if (binding && binding.value && binding.value.keyword && binding.value.keyword !== '') {
+            if (binding?.value?.keyword) {
                 el.innerHTML = el.innerHTML.replace(
-                    new RegExp(binding.value.keyword, "gi"),
+                    new RegExp(binding.value.keyword, 'gi'),
                     (match: any) => `<span class="highlightText">${match}</span>`
                 );
             }
-        } catch { }
-    }
+        } catch {}
+    },
 });
 
 // 👉 Custom global filters
@@ -93,7 +84,6 @@ app.config.globalProperties.$filters = {
     durationToStr(startDate: string, endDate: string) {
         const diff = moment.duration(moment(startDate).diff(moment(endDate)));
         const milliseconds: number = diff.asMilliseconds();
-
         const numberEnding = (number: number) => (number > 1 ? 's' : '');
 
         let temp = Math.floor(milliseconds / 1000);
@@ -113,7 +103,7 @@ app.config.globalProperties.$filters = {
         if (seconds) return seconds + ' giây';
 
         return '';
-    }
+    },
 };
 
 app.config.globalProperties.$router = router;
@@ -129,22 +119,26 @@ const axiosInstance = axios.create({
 axios.defaults.headers.post['Content-Type'] = 'application/json';
 axios.defaults.baseURL = import.meta.env.VITE_API_URL;
 
-axios.interceptors.request.use(
-    function (config) {
-        const source = axios.CancelToken.source();
-        config.cancelToken = source.token;
+axiosInstance.interceptors.request.use(
+    (config) => {
+        const token = localStorage.getItem('accessToken');
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+        }
         return config;
     },
-    function (err) {
-        return Promise.reject(err);
-    }
+    (err) => Promise.reject(err)
 );
 
-axios.interceptors.response.use(
+axiosInstance.interceptors.response.use(
     (response) => response,
     (error) => {
-        console.log('axios.interceptors', error);
-        return error;
+        if (error.response && error.response.status === 401) {
+            const authStore = useAuthStore();
+            authStore.logout();
+            router.push({ name: 'login' });
+        }
+        return Promise.reject(error);
     }
 );
 
