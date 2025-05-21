@@ -21,43 +21,6 @@
     </form>
 </template>
 
-<script setup>
-import { reactive, watch } from 'vue';
-import { usersApi } from '@/api/usersApi';
-import { ElMessage } from 'element-plus';
-
-const props = defineProps({ user: Object });
-const emit = defineEmits(['updated']);
-
-const form = reactive({
-    fullName: '',
-    phone: '',
-    address: '',
-});
-
-watch(
-    () => props.user,
-    (val) => {
-        if (val) {
-            form.fullName = val.info?.fullName;
-            form.phone = val.contact?.phone;
-            form.address = val.contact?.address;
-        }
-    },
-    { immediate: true }
-);
-
-const submit = async () => {
-    try {
-        usersApi.updateProfile({
-            fullName: form.fullName,
-            phone: form.phone,
-            address: form.address,
-        });
-        ElMessage.success('Cập nhật thành công');
-        emit('updated');
-    } catch (err) {
-        ElMessage.error('Đã xảy ra lỗi khi cập nhật');
-    }
-};
-</script>
+<script
+    lang="ts"
+    src="@/scripts/private/user/profile/components/profileEditForm.ts"></script>

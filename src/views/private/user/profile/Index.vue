@@ -12,48 +12,4 @@
     </div>
 </template>
 
-<script setup>
-import { ref, onMounted } from 'vue';
-import { usersApi } from '@/api/usersApi';
-import { useAddressStore } from '@/stores/addressStore';
-import { useI18n } from 'vue-i18n';
-import TopNav from '@/views/layout/topnav/Index.vue';
-import AvatarCard from './components/AvatarCard.vue';
-import AuthInfoForm from './components/AuthInfoForm.vue';
-import AuthContactForm from './components/AuthContactForm.vue';
-
-const user = ref(null);
-
-const { t } = useI18n();
-const addressStoreInstance = useAddressStore();
-const { fetchProvinces, fetchDistricts, fetchWards } = addressStoreInstance;
-
-const getUserProfile = async () => {
-    try {
-        const response = await usersApi.getProfile();
-        const data = response.data;
-
-        // 👇 Ép kiểu về number
-        data.province = data.province ? Number(data.province) : null;
-        data.district = data.district ? Number(data.district) : null;
-        data.ward = data.ward ? Number(data.ward) : null;
-
-        user.value = data;
-
-        await fetchProvinces();
-
-        if (user.value.province) {
-            await fetchDistricts(user.value.province);
-        }
-
-        if (user.value.district) {
-            await fetchWards(user.value.district);
-        }
-    } catch (error) {
-        console.error('Error fetching user profile:', error);
-    }
-};
-
-
-onMounted(getUserProfile);
-</script>
+<script lang="ts" src="@/scripts/private/user/profile/index.ts"></script>
