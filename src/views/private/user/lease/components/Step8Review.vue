@@ -1,8 +1,6 @@
 <template>
     <div>
-        <h2 class="text-xl font-semibold mb-4">
-            Step 8: Xác nhận lại thông tin
-        </h2>
+        <h2 class="text-xl font-semibold mb-4">Step 8: Xác nhận lại thông tin</h2>
 
         <!-- Loại chỗ ở -->
         <div class="mb-4">
@@ -46,9 +44,9 @@
             <label class="block mb-1">Ảnh:</label>
             <div class="flex gap-2 flex-wrap">
                 <img
-                    v-for="(photo, index) in form.photos"
+                    v-for="(src, index) in photoPreviews"
                     :key="index"
-                    :src="photo"
+                    :src="src"
                     alt="photo"
                     class="w-24 h-24 object-cover rounded border" />
             </div>
@@ -59,9 +57,7 @@
             <ul class="bg-gray-100 p-4 rounded text-sm space-y-1">
                 <li>
                     <strong>Giá mỗi đêm:</strong>
-                    <span>{{
-                        formatCurrency(form.pricing.pricePerNight)
-                    }}</span>
+                    <span>{{ formatCurrency(form.pricing.pricePerNight) }}</span>
                 </li>
                 <li>
                     <strong>Phí dọn dẹp:</strong>
@@ -92,7 +88,7 @@
 </template>
 
 <script lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onUnmounted, watch } from 'vue';
 import { useAddressStore } from '@/stores/addressStore';
 import { useI18n } from 'vue-i18n';
 
@@ -113,14 +109,12 @@ export default {
             );
         });
 
-        // Ánh xạ loại chỗ ở
         const propertyTypeMap: Record<string, string> = {
             apartment: 'Căn hộ',
             house: 'Nhà riêng',
             private_room: 'Phòng riêng',
         };
 
-        // Ánh xạ tiện ích (ví dụ, bạn cần đồng bộ với danh sách ở Step tiện ích)
         const amenityMap: Record<string, string> = {
             wifi: 'Wi-Fi',
             air_conditioner: 'Điều hòa',
@@ -131,11 +125,9 @@ export default {
             tv: 'TV',
         };
 
-        // Label loại chỗ ở
         const propertyTypeLabel =
             propertyTypeMap[props.form.propertyType] || props.form.propertyType;
 
-        // Danh sách label tiện ích
         const amenityLabels = props.form.amenities.map(
             (key: string) => amenityMap[key] || key
         );
@@ -148,6 +140,29 @@ export default {
             }).format(price);
         };
 
+        const photoPreviews = ref<string[]>([]);
+
+        watch(
+            () => props.form.photos,
+            (newPhotos: (string | File)[]) => {
+                // Xoá URL cũ trước (nếu là blob)
+                photoPreviews.value.forEach((url) => {
+                    if (url.startsWith('blob:')) URL.revokeObjectURL(url);
+                });
+
+                photoPreviews.value = newPhotos.map((p) =>
+                    typeof p === 'string' ? p : URL.createObjectURL(p)
+                );
+            },
+            { immediate: true }
+        );
+
+        onUnmounted(() => {
+            photoPreviews.value.forEach((url) => {
+                if (url.startsWith('blob:')) URL.revokeObjectURL(url);
+            });
+        });
+
         const checkBeforeNext = async () => true;
         context.expose({ checkBeforeNext });
 
@@ -157,6 +172,7 @@ export default {
             amenityLabels,
             formatCurrency,
             fullAddress,
+            photoPreviews,
             t,
         };
     },

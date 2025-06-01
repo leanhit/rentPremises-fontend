@@ -1,6 +1,12 @@
-import { ref, reactive, computed } from 'vue';
+import { ref, computed, reactive } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { ElMessage } from 'element-plus';
+import { leaseApi } from '@/api/leaseApi';
+
 import TopNav from '@/views/layout/topnav/Index.vue';
+import StepProgressBar from '@/views/private/user/lease/components/StepProgress.vue';
+import Success from '@/views/private/user/lease/components/Success.vue';
+
 import Step1Basic from '@/views/private/user/lease/components/Step1Basic.vue';
 import Step2Location from '@/views/private/user/lease/components/Step2Location.vue';
 import Step3Amenities from '@/views/private/user/lease/components/Step3Amenities.vue';
@@ -9,12 +15,12 @@ import Step5Pricing from '@/views/private/user/lease/components/Step5Pricing.vue
 import Step6Availability from '@/views/private/user/lease/components/Step6Availability.vue';
 import Step7Booking from '@/views/private/user/lease/components/Step7Booking.vue';
 import Step8Review from '@/views/private/user/lease/components/Step8Review.vue';
-import Success from '@/views/private/user/lease/components/Success.vue';
-import StepProgressBar from '@/views/private/user/lease/components/StepProgress.vue';
 
 export default {
     components: {
         TopNav,
+        StepProgressBar,
+        Success,
         Step1Basic,
         Step2Location,
         Step3Amenities,
@@ -23,41 +29,19 @@ export default {
         Step6Availability,
         Step7Booking,
         Step8Review,
-        Success,
-        StepProgressBar,
     },
     setup() {
         const { t } = useI18n();
         const step = ref(1);
         const step8Done = ref(false);
 
-        const step1Ref = ref(null)
-        const step2Ref = ref(null)
-        const step3Ref = ref(null)
-        const step4Ref = ref(null)
-        const step5Ref = ref(null)
-        const step6Ref = ref(null)
-        const step7Ref = ref(null)
-        const step8Ref = ref(null)
-
-        const stepLabels = [
-            'Thông tin cơ bản',
-            'Vị trí',
-            'Tiện nghi',
-            'Hình ảnh',
-            'Giá & chính sách',
-            'Lịch cho thuê',
-            'Cài đặt đặt phòng',
-            'Xác nhận',
-        ];
-
         const form = reactive({
-            propertyType: 'apartment',
             maxGuests: 1,
+            propertyType: 'apartment',
             province: '',
             district: '',
             ward: '',
-            detail: 'Nhà tôi',
+            detail: 'Nhà riêng của tôi',
             amenities: [],
             photos: [],
             pricing: {
@@ -67,59 +51,85 @@ export default {
             availability: {
                 startDate: '',
                 endDate: '',
-                minStay: 1,
             },
             bookingOptions: {
                 type: 'instant',
                 minNights: 1,
             },
-            review: {},
         });
 
-        const nextFunction = async () => {
-            if (step.value === 1) {
-                const isValid = await step1Ref.value?.checkBeforeNext?.();
-                if (!isValid) return;
-            } else if (step.value === 2) {
-                const isValid = await step2Ref.value?.checkBeforeNext?.();
-                if (!isValid) return;
-            } else if (step.value === 3) {
-                const isValid = await step3Ref.value?.checkBeforeNext?.();
-                if (!isValid) return;
-            } else if (step.value === 4) {
-                const isValid = await step4Ref.value?.checkBeforeNext?.();
-                if (!isValid) return;
-            } else if (step.value === 5) {
-                const isValid = await step5Ref.value?.checkBeforeNext?.();
-                if (!isValid) return;
-            } else if (step.value === 6) {
-                const isValid = await step6Ref.value?.checkBeforeNext?.();
-                if (!isValid) return;
-            } else if (step.value === 7) {
-                const isValid = await step7Ref.value?.checkBeforeNext?.();
-                if (!isValid) return;
-            } else if (step.value === 8) {
-                const isValid = await step8Ref.value?.checkBeforeNext?.();
-                if (!isValid) return;
-            }
-            step.value++;
+        const nextFunction = () => {
+            if (step.value < 8) step.value++;
         };
 
         const previewFunction = () => {
-            if (step.value > 1) {
-                step.value--;
-            } else if (step.value === 8) {
-                step8Done.value = false;
+            if (step.value > 1) step.value--;
+        };
+
+        const buildFormDataFromForm = (form: any): FormData => {
+            const formData = new FormData();
+
+            formData.append('maxGuests', String(form.maxGuests));
+            formData.append('propertyType', form.propertyType);
+            formData.append('province', form.province);
+            formData.append('district', form.district);
+            formData.append('ward', form.ward);
+            formData.append('detail', form.detail);
+
+            form.amenities.forEach((item: string) => {
+                formData.append('amenities', item);
+            });
+
+            formData.append('pricing.pricePerNight', String(form.pricing.pricePerNight));
+            formData.append('pricing.cleaningFee', String(form.pricing.cleaningFee));
+
+            formData.append('availability.startDate', form.availability.startDate);
+            formData.append('availability.endDate', form.availability.endDate);
+
+            formData.append('bookingOptions.type', form.bookingOptions.type);
+            formData.append('bookingOptions.minNights', String(form.bookingOptions.minNights));
+
+            form.photos.forEach((file: File) => {
+                formData.append('photos', file);
+            });
+
+            return formData;
+        };
+
+        const submitFunction = async () => {
+            try {
+                console.log('Dữ liệu gửi:', form);
+
+                const formData = buildFormDataFromForm(form);
+                const res = await leaseApi.addProperty(formData);
+
+                if (res.status === 200) {
+                    step8Done.value = true;
+                } else {
+                    ElMessage.error(res.data?.message || t('Đã có lỗi xảy ra'));
+                }
+            } catch (err: any) {
+                console.error(err);
+                const serverData = err.response?.data;
+                let message = '';
+
+                if (typeof serverData === 'string') {
+                    message = serverData;
+                } else if (serverData?.message) {
+                    message = serverData.message;
+                } else if (Array.isArray(serverData)) {
+                    message = serverData.join(', ');
+                } else {
+                    message = t('Có lỗi khi gửi dữ liệu');
+                }
+
+                ElMessage.error(message);
             }
         };
 
-        const submitFunction = () => {
-            console.log('Dữ liệu gửi:', form.value);
-            step8Done.value = true;
-        };
 
         const currentStepComponent = computed(() => {
-            const components = [
+            const steps = [
                 Step1Basic,
                 Step2Location,
                 Step3Amenities,
@@ -129,33 +139,17 @@ export default {
                 Step7Booking,
                 Step8Review,
             ];
-            return components[step.value - 1];
-        });
-        const currentStepRef = computed(() => {
-            const refs = [
-                step1Ref,
-                step2Ref,
-                step3Ref,
-                step4Ref,
-                step5Ref,
-                step6Ref,
-                step7Ref,
-                step8Ref,
-            ];
-            return refs[step.value - 1];
+            return steps[step.value - 1];
         });
 
         return {
-            t,
             step,
-            stepLabels,
             step8Done,
             form,
             nextFunction,
             previewFunction,
             submitFunction,
             currentStepComponent,
-            currentStepRef,
         };
     },
 };

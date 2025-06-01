@@ -10,18 +10,10 @@
             <!-- Step Indicator -->
             <StepProgressBar :step="step" :step8Done="step8Done" />
 
-            <!-- Tiêu đề bước hiện tại -->
-            <!-- <h2 class="text-xl font-semibold mb-4">
-                {{ stepLabels[step - 1] }}
-            </h2> -->
-
             <!-- Nội dung theo bước -->
             <div v-if="!step8Done">
                 <div class="mb-8">
-                    <component
-                        :is="currentStepComponent"
-                        :form="form"
-                        :ref="currentStepRef" />
+                    <component :is="currentStepComponent" :form="form" />
                 </div>
 
                 <!-- Nút điều hướng -->
